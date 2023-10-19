@@ -53,4 +53,27 @@ abstract class BaseConsumerWidget extends ConsumerWidget {
   void dismissProgressLoading() {
     EasyLoading.dismiss(animation: true);
   }
+
+
+  showAlert(
+      {required String title,
+        required String text,
+        required BuildContext context}) {
+    showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: Text(title),
+            content: Text(text),
+            actions: [
+              ElevatedButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  child: const Text('Ok'))
+            ],
+          );
+        });
+  }
+
 }

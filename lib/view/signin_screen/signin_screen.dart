@@ -1,6 +1,8 @@
+import 'package:appwrite/appwrite.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:riverpod_demo/api_provider/api_provider.dart';
 import 'package:riverpod_demo/utils/app_colors.dart';
 import 'package:riverpod_demo/utils/app_strings.dart';
 import 'package:riverpod_demo/utils/validator.dart';
@@ -8,6 +10,9 @@ import 'package:riverpod_demo/view/sign_up_screen/signup_screen.dart';
 import 'package:riverpod_demo/widget/common_button.dart';
 import 'package:riverpod_demo/widget/text_form_field.dart';
 import 'package:riverpod_demo/widget/base_widget.dart';
+
+final appWriteViewModelProvider =
+    ChangeNotifierProvider((ref) => ApiProviderViewModel());
 
 class SignInPage extends BaseConsumerWidget {
   SignInPage({super.key});
@@ -19,6 +24,37 @@ class SignInPage extends BaseConsumerWidget {
     final _emailController = TextEditingController();
     final _passwordController = TextEditingController();
 
+    signIn() async {
+      showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (BuildContext context) {
+            return Dialog(
+              backgroundColor: Colors.transparent,
+              child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: const [
+                    CircularProgressIndicator(),
+                  ]),
+            );
+          });
+
+      try {
+        await ref.read(appWriteViewModelProvider).createEmailSession(
+              email: _emailController.text,
+              password: _passwordController.text,
+            );
+
+        Navigator.pop(context);
+      } on AppwriteException catch (e) {
+        Navigator.pop(context);
+        showAlert(
+            title: AppStrings.loginFailed,
+            text: e.message.toString(),
+            context: context);
+      }
+    }
+
     return Scaffold(
       body: Center(
         child: Padding(
@@ -29,7 +65,7 @@ class SignInPage extends BaseConsumerWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
-                  AppStrings.logIn,
+                  AppStrings.signIn,
                   style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 20,

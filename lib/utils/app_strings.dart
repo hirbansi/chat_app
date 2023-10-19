@@ -9,10 +9,12 @@ class AppStrings {
   static const String enterConfirmPassword = "Enter Confirm Password";
   static const String signIn = "Sign In";
   static const String signUp = "Sign Up";
-  static const String logIn = "Login";
   static const String loginCredentials =
       "Welcome back! Login with you credentials";
   static const String createAnAccount = "Create an account";
   static const String dontHaveAnAccount = "Don't have an account?";
   static const String alreadyHaveAnAccount = "Already have an account?";
+  static const String loginFailed = "Login failed";
+  static const String accountCreated = "Account created!";
+  static const String accountCreationFailed = "Account creation failed";
 }

@@ -26,6 +26,8 @@ class AppValidators {
       return "Confirm Password is required";
     } else if (value != password) {
       return "Password mismatch";
+    } else {
+      return null;
     }
   }
 }
