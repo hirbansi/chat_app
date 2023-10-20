@@ -1,8 +1,7 @@
-import 'package:appwrite/appwrite.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:riverpod_demo/api_provider/api_provider.dart';
+import 'package:riverpod_demo/core/provider/view_model_provider.dart';
 import 'package:riverpod_demo/utils/app_colors.dart';
 import 'package:riverpod_demo/utils/app_strings.dart';
 import 'package:riverpod_demo/utils/validator.dart';
@@ -11,9 +10,6 @@ import 'package:riverpod_demo/widget/common_button.dart';
 import 'package:riverpod_demo/widget/text_form_field.dart';
 import 'package:riverpod_demo/widget/base_widget.dart';
 
-final appWriteViewModelProvider =
-    ChangeNotifierProvider((ref) => ApiProviderViewModel());
-
 class SignUpPage extends BaseConsumerWidget {
   SignUpPage({super.key});
 
@@ -21,41 +17,7 @@ class SignUpPage extends BaseConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final _emailController = TextEditingController();
-    final _passwordController = TextEditingController();
     // final _confirmPasswordController = TextEditingController();
-
-    createAccount() async {
-      showDialog(
-          context: context,
-          barrierDismissible: false,
-          builder: (BuildContext context) {
-            return Dialog(
-              backgroundColor: Colors.transparent,
-              child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: const [
-                    CircularProgressIndicator(),
-                  ]),
-            );
-          });
-
-      try {
-        await ref.read(appWriteViewModelProvider).createUser(
-              email: _emailController.text,
-              password: _passwordController.text,
-            );
-        Navigator.pop(context);
-        const snackBar = SnackBar(content: Text(AppStrings.accountCreated));
-        ScaffoldMessenger.of(context).showSnackBar(snackBar);
-      } on AppwriteException catch (e) {
-        Navigator.pop(context);
-        showAlert(
-            title: AppStrings.accountCreationFailed,
-            text: e.message.toString(),
-            context: context);
-      }
-    }
 
     return Scaffold(
       body: Center(
@@ -86,7 +48,8 @@ class SignUpPage extends BaseConsumerWidget {
                   inputType: TextInputType.emailAddress,
                   hintText: AppStrings.enterEmail,
                   autofillHints: <String>[AutofillHints.email],
-                  controller: _emailController,
+                  controller:
+                      ref.watch(signUpScreenViewModelProvider).emailController,
                   validator: AppValidators.emailValidator,
                   submitted: false,
                   obscure: true,
@@ -98,7 +61,9 @@ class SignUpPage extends BaseConsumerWidget {
                     inputType: TextInputType.visiblePassword,
                     hintText: AppStrings.enterPassword,
                     autofillHints: const <String>[AutofillHints.password],
-                    controller: _passwordController,
+                    controller: ref
+                        .watch(signUpScreenViewModelProvider)
+                        .passwordController,
                     validator: AppValidators.passwordValidator,
                     submitted: false,
                     obscure: true,
@@ -126,6 +91,9 @@ class SignUpPage extends BaseConsumerWidget {
                     title: AppStrings.signUp,
                     onTap: () {
                       if (_formKey.currentState!.validate()) {
+                        ref
+                            .watch(signUpScreenViewModelProvider)
+                            .createAccount(context: context, ref: ref);
                       } else {}
                     },
                   ),

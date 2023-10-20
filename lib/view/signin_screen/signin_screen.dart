@@ -1,8 +1,7 @@
-import 'package:appwrite/appwrite.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:riverpod_demo/api_provider/api_provider.dart';
+import 'package:riverpod_demo/core/provider/view_model_provider.dart';
 import 'package:riverpod_demo/utils/app_colors.dart';
 import 'package:riverpod_demo/utils/app_strings.dart';
 import 'package:riverpod_demo/utils/validator.dart';
@@ -11,9 +10,6 @@ import 'package:riverpod_demo/widget/common_button.dart';
 import 'package:riverpod_demo/widget/text_form_field.dart';
 import 'package:riverpod_demo/widget/base_widget.dart';
 
-final appWriteViewModelProvider =
-    ChangeNotifierProvider((ref) => ApiProviderViewModel());
-
 class SignInPage extends BaseConsumerWidget {
   SignInPage({super.key});
 
@@ -21,40 +17,6 @@ class SignInPage extends BaseConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final _emailController = TextEditingController();
-    final _passwordController = TextEditingController();
-
-    signIn() async {
-      showDialog(
-          context: context,
-          barrierDismissible: false,
-          builder: (BuildContext context) {
-            return Dialog(
-              backgroundColor: Colors.transparent,
-              child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: const [
-                    CircularProgressIndicator(),
-                  ]),
-            );
-          });
-
-      try {
-        await ref.read(appWriteViewModelProvider).createEmailSession(
-              email: _emailController.text,
-              password: _passwordController.text,
-            );
-
-        Navigator.pop(context);
-      } on AppwriteException catch (e) {
-        Navigator.pop(context);
-        showAlert(
-            title: AppStrings.loginFailed,
-            text: e.message.toString(),
-            context: context);
-      }
-    }
-
     return Scaffold(
       body: Center(
         child: Padding(
@@ -84,10 +46,10 @@ class SignInPage extends BaseConsumerWidget {
                   inputType: TextInputType.emailAddress,
                   hintText: AppStrings.enterEmail,
                   autofillHints: <String>[AutofillHints.email],
-                  controller: _emailController,
+                  controller:
+                      ref.watch(signInScreenViewModelProvider).emailController,
                   validator: AppValidators.emailValidator,
                   submitted: false,
-                  obscure: true,
                   textInputAction: TextInputAction.next,
                 ),
                 Padding(
@@ -96,7 +58,9 @@ class SignInPage extends BaseConsumerWidget {
                     inputType: TextInputType.visiblePassword,
                     hintText: AppStrings.enterPassword,
                     autofillHints: const <String>[AutofillHints.password],
-                    controller: _passwordController,
+                    controller: ref
+                        .watch(signInScreenViewModelProvider)
+                        .passwordController,
                     validator: AppValidators.passwordValidator,
                     obscure: true,
                     textInputAction: TextInputAction.next,
@@ -109,6 +73,9 @@ class SignInPage extends BaseConsumerWidget {
                     title: AppStrings.signIn,
                     onTap: () {
                       if (_formKey.currentState!.validate()) {
+                        ref
+                            .watch(signInScreenViewModelProvider)
+                            .signIn(context: context, ref: ref);
                       } else {}
                     },
                   ),

@@ -7,7 +7,7 @@ enum AuthStatus { uninitialized, authenticated, unauthenticated }
 
 class ApiProviderViewModel extends ChangeNotifier {
   Client client = Client();
-  late final Account account;
+  Account? account;
   late User _currentUser;
 
   AuthStatus _status = AuthStatus.uninitialized;
@@ -37,9 +37,10 @@ class ApiProviderViewModel extends ChangeNotifier {
 
   loadUser() async {
     try {
-      final user = await account.get();
-      _status = AuthStatus.authenticated;
-      _currentUser = user;
+      await account?.get().then((value) {
+        _status = AuthStatus.authenticated;
+        _currentUser = value;
+      });
     } catch (e) {
       _status = AuthStatus.unauthenticated;
     } finally {
@@ -47,10 +48,10 @@ class ApiProviderViewModel extends ChangeNotifier {
     }
   }
 
-  Future<User> createUser(
+  Future<User?> createUser(
       {required String email, required String password}) async {
     try {
-      final user = await account.create(
+      final user = await account?.create(
           userId: ID.unique(), email: email, password: password, name: 'Demo');
       return user;
     } finally {
@@ -58,12 +59,14 @@ class ApiProviderViewModel extends ChangeNotifier {
     }
   }
 
-  Future<Session> createEmailSession(
+  Future<Session?> createEmailSession(
       {required String email, required String password}) async {
     try {
       final session =
-          await account.createEmailSession(email: email, password: password);
-      _currentUser = await account.get();
+          await account?.createEmailSession(email: email, password: password);
+      await account?.get().then((value) {
+        _currentUser = value;
+      });
       _status = AuthStatus.authenticated;
       return session;
     } finally {
